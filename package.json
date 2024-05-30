@@ -20,7 +20,8 @@
     "start": "node app.js",
     "start:debug": "DEBUG=true node app.js",
     "start-api": "node api/index.js",
-    "start-api:debug": "DEBUG=true node app.js"
+    "start-api:debug": "DEBUG=true node app.js",
+    "lint": "eslint"
   },
   "author": "Essem <essem@essem.space>",
   "license": "MIT",
