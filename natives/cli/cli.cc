@@ -179,9 +179,8 @@ int main(int argc, char *argv[]) {
         continue;
       }
 
-      // only check for strings for now, the parser *should* handle bools properly?
-      std::string val = GetArgument<std::string>(args.flags, arg.first);
       if (arg.second.type == typeid(int)) {
+        std::string val = GetArgument<std::string>(args.flags, arg.first);
         try {
           args.flags[arg.first] = std::stoi(val);
         } catch (std::invalid_argument &e) {
@@ -189,6 +188,7 @@ int main(int argc, char *argv[]) {
           return 1;
         }
       } else if (arg.second.type == typeid(float)) {
+        std::string val = GetArgument<std::string>(args.flags, arg.first);
         try {
           args.flags[arg.first] = std::stof(val);
         } catch (std::invalid_argument &e) {
