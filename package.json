@@ -40,6 +40,8 @@
     "build:natives:debug": "cmake-js compile -BDebug --CDWITH_MAGICK=ON",
     "build:natives:no-magick": "cmake-js compile --CDWITH_MAGICK=OFF",
     "build:natives:debug-no-magick": "cmake-js compile -BDebug --CDWITH_MAGICK=OFF",
+    "build:cli": "cmake -B standalone-build -DWITH_CLI=ON -DWITH_MAGICK=ON -DCMAKE_BUILD_TYPE=Release && cmake --build standalone-build",
+    "build:cli:no-magick": "cmake -B standalone-build -DWITH_CLI=ON -DWITH_MAGICK=OFF -DCMAKE_BUILD_TYPE=Release && cmake --build standalone-build",
     "build:ts": "tsc",
     "docker:build": "DOCKER_BUILDKIT=1 docker build -t esmbot .",
     "docker:run-bot": "docker run --rm --network=host esmbot",
