@@ -54,6 +54,7 @@ class MediaCommand extends Command {
 
     const ephemeral = this.getOptionBoolean("ephemeral");
     const spoiler = this.getOptionBoolean("spoiler");
+    const sizeLimit = this.interaction?.attachmentSizeLimit ?? maxFileSize(this.guild);
     let mediaParams: MediaParams;
 
     if (staticProps.requiresImage) {
@@ -85,6 +86,7 @@ class MediaCommand extends Command {
           ephemeral,
           spoiler,
           token: this.interaction?.token,
+          filesize: sizeLimit,
         };
       } catch (e) {
         runningCommands.delete(this.author.id);
@@ -99,6 +101,7 @@ class MediaCommand extends Command {
         ephemeral,
         spoiler,
         token: this.interaction?.token,
+        filesize: sizeLimit,
       };
     }
 
@@ -174,7 +177,7 @@ class MediaCommand extends Command {
         contents: buffer,
         name: `${spoiler || result.spoiler ? "SPOILER_" : ""}${staticProps.command}.${type}`,
       };
-      if (buffer.length > (this.interaction?.attachmentSizeLimit ?? maxFileSize(this.guild))) {
+      if (buffer.length > sizeLimit) {
         if (process.env.TEMPDIR && process.env.TEMPDIR !== "" && this.permissions.has("EMBED_LINKS")) {
           if (this.interaction) {
             await upload(this.client, { ...file, flags }, this.interaction);

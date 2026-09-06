@@ -360,7 +360,7 @@ process.on("SIGINT", (s) => sigHandler(s));
 process.on("SIGTERM", (s) => sigHandler(s));
 
 const allowedExtensions = ["gif", "png", "jpeg", "jpg", "webp", "avif"];
-const fileSize = 20971520;
+const defaultFileSize = 20971520;
 
 async function finishJob(data: JobOutput, job: MiniJob, object: MediaParams, ws: WSocket) {
   log(`Sending result of job ${job.id}`, job.num);
@@ -382,13 +382,11 @@ async function finishJob(data: JobOutput, job: MiniJob, object: MediaParams, ws:
   jobs.set(job.id, jobObject);
   jobs.markFinished(job.id);
   let r: RawMessage | undefined;
-  if (clientID && object.token && allowedExtensions.includes(jobObject.ext) && jobObject.data.length < fileSize) {
+  const fileSize = object.filesize && object.filesize > 0 ? object.filesize : defaultFileSize;
+  if (clientID && object.token && allowedExtensions.includes(jobObject.ext) && jobObject.data.length <= fileSize) {
     const form = new FormData();
-    form.set(
-      "files[0]",
-      new Blob([jobObject.data]),
-      `${jobObject.spoiler || object.spoiler ? "SPOILER_" : ""}${object.cmd}.${jobObject.ext}`,
-    );
+    const filename = `${jobObject.spoiler || object.spoiler ? "SPOILER_" : ""}${object.cmd}.${jobObject.ext}`;
+    form.set("files[0]", new Blob([jobObject.data]), filename);
     const controller = new AbortController();
     const timeout = setTimeout(
       () => {

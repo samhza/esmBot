@@ -66,6 +66,7 @@ The job object is formatted like this:
   "ephemeral": string,  // whether to post the output as an ephemeral message (only when responding directly, see below section)
   "spoiler": string,    // whether to post the output as a spoiler (only when responding directly, see below section)
   "token": string,      // the interaction token (only when responding directly, see below section)
+  "filesize": number,   // maximum attachment size in bytes allowed for the response (only when responding directly, see below section)
 }
 ```
 
@@ -77,4 +78,4 @@ The media API will attempt to respond to a command by itself if all of the follo
 - The bot's application/user ID is specified on the API server through the `CLIENT_ID` environment variable
 - The incoming job object has an interaction token set in the job object with the key `token`
 - The output data is a PNG, JPEG, GIF, WEBP, or AVIF
-- The output data is less than 10 MB
+- The output data is no larger than the `filesize` value in the job object. If unspecified, a limit of 20 MiB is assumed.
