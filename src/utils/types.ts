@@ -78,6 +78,7 @@ export interface MediaParams {
   ephemeral?: boolean;
   spoiler?: boolean;
   token?: string;
+  filesize?: number;
 }
 
 export interface MediaMeta {
