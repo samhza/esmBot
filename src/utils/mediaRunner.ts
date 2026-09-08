@@ -1,15 +1,11 @@
 import { Buffer } from "node:buffer";
 import path from "node:path";
-import { request } from "./media.ts";
-import type { FuncObject, MediaLib } from "./mediaLib.ts";
+import { requestata, requestData } from "./media.ts";
+import type { MediaLib } from "./mediaLib.ts";
 import { mimeToExt } from "./mime.ts";
-import type { JobOutput, MediaParams, MediaTypes } from "./types.ts";
+import type { JobOutput, MediaParams } from "./types.ts";
 
 let media: MediaLib | undefined;
-
-const defaultExts = {
-  image: "png",
-};
 
 export default async function run(object: MediaParams): Promise<JobOutput> {
   // dynamically load media library
@@ -18,94 +14,34 @@ export default async function run(object: MediaParams): Promise<JobOutput> {
     media = imported.media;
   }
 
-  // Check if command exists
-  const possibleFuncs: (FuncObject & { type: MediaTypes })[] = [];
-  const supportedTypes: MediaTypes[] = [];
-  for (const [type, cmds] of Object.entries(media.funcs)) {
-    const cmd = cmds.find((v) => v.name === object.cmd);
-    if (cmd) {
-      possibleFuncs.push({ ...cmd, type: type as MediaTypes });
-      supportedTypes.push(type as MediaTypes);
-    }
-  }
-
-  if (supportedTypes.length === 0) {
-    return {
-      buffer: Buffer.alloc(0),
-      type: "nocmd",
-      spoiler: false,
-    };
-  }
-
-  let inputBuffer: Buffer | undefined;
-  let fileType: string | undefined;
-  let mediaType: MediaTypes | undefined;
-  let spoiler = false;
+  let input: MediaData | undefined;
+  let spoiler = !!object.spoiler;
   try {
-    for (const media of object.inputs) {
-      const res = await request(new URL(media.path), supportedTypes, false);
-      if (res) {
-        inputBuffer = res.buf;
-        fileType = res.type;
-        mediaType = res.mediaType;
-        spoiler = media.spoiler;
+    const func = media.funcs.find((v) => v.name === object.cmd);
+    if (!func) throw "nocmd";
+
+    for (const source of object.inputs) {
+      input = await requestData(new URL(source.path));
+      if (input) {
+        spoiler ||= source.spoiler;
         break;
       }
     }
-    if ((!inputBuffer || !mediaType) && possibleFuncs.some((v) => v.input)) throw "nomedia";
+    if (!input && func.input) throw "nomedia";
+
+    // Reject non-animated formats for commands that only work on animations
+    if (func.anim && input?.type !== "image/gif" && input?.type !== "image/webp") throw "noanim";
   } catch (e) {
     if (typeof e !== "string") throw e;
-    return {
-      buffer: Buffer.alloc(0),
-      type: e,
-      spoiler: false,
-    };
+    return { buffer: Buffer.alloc(0), type: e, spoiler: false };
   }
-
-  if (object.spoiler) spoiler = true;
-
-  let chosenFunc = possibleFuncs.find((v) => v.type === mediaType);
-  if (!chosenFunc) {
-    if (!possibleFuncs.some((v) => !v.input)) {
-      return {
-        buffer: Buffer.alloc(0),
-        type: "nomedia",
-        spoiler: false,
-      };
-    } else {
-      chosenFunc = possibleFuncs[0];
-    }
-  }
-
-  // Reject non-animated formats for commands that only work on animations
-  if (chosenFunc.type === "image" && fileType !== "image/gif" && fileType !== "image/webp" && chosenFunc.anim) {
-    return {
-      buffer: Buffer.alloc(0),
-      type: "noanim",
-      spoiler: false,
-    };
-  }
-
-  if (!mediaType) {
-    // A function without input will always return a single media type
-    mediaType = possibleFuncs[0].type;
-  }
-
-  // Convert from a MIME type (e.g. "image/png") to something the media processor understands (e.g. "png").
-  // Don't set `type` directly on the object we are passed as it will be read afterwards.
-  // If no type is given (say, the command generates its own output), use a default type.
-  const fileExtension = fileType ? mimeToExt(fileType) : defaultExts[mediaType];
-
-  const inputObj = {
-    data: inputBuffer?.buffer.slice(
-      inputBuffer.byteOffset,
-      inputBuffer.byteOffset + inputBuffer.byteLength,
-    ) as ArrayBuffer,
-    type: fileExtension,
-  };
 
   object.params.basePath = path.join(import.meta.dirname, "../../");
-  const { data, type } = await media.process(mediaType, object.cmd, object.params, inputBuffer ? inputObj : {});
+  const { data, type } = await media.process(
+    object.cmd,
+    object.params,
+    input ? { data: input.data, type: mimeToExt(input.type) } : {},
+  );
   return {
     buffer: data,
     type,

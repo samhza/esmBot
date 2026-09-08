@@ -3,7 +3,7 @@ import { setTimeout as setTimeoutPromise } from "node:timers/promises";
 import WSocket, { type Data, type ErrorEvent } from "ws";
 import logger from "./logger.ts";
 import { mimeToExt } from "./mime.ts";
-import type { JobOutput, MediaFormats, MediaFuncs, MediaFuncTypes, MediaTypes } from "./types.ts";
+import type { JobOutput, MediaFormats } from "./types.ts";
 
 const Rerror = 0x01;
 const Tqueue = 0x02;
@@ -35,8 +35,7 @@ class MediaConnection {
   tag: number;
   disconnected: boolean;
   formats: MediaFormats;
-  funcs: MediaFuncs;
-  types: MediaFuncTypes;
+  commands: Set<string>;
   wsproto: string;
   sockurl: string;
   conn: WSocket;
@@ -50,8 +49,7 @@ class MediaConnection {
     this.tag = 0;
     this.disconnected = false;
     this.formats = {};
-    this.funcs = {};
-    this.types = {};
+    this.commands = new Set();
     if (tls) {
       this.wsproto = "wss";
     } else {
@@ -82,17 +80,7 @@ class MediaConnection {
     logger.debug(`Received message from media server ${this.host} with opcode ${op}`);
     if (op === Rinit) {
       this.formats = JSON.parse(msg.toString("utf8", 7));
-      this.funcs = {
-        image: this.formats.image ? Object.keys(this.formats.image) : [],
-      };
-      this.types = {};
-      for (const [type, cmdList] of Object.entries(this.formats)) {
-        const cmds = Object.keys(cmdList);
-        for (const cmd of cmds) {
-          if (!this.types[cmd]) this.types[cmd] = [];
-          this.types[cmd].push(type as MediaTypes);
-        }
-      }
+      this.commands = new Set(Object.values(this.formats).flatMap((cmds) => Object.keys(cmds)));
       return;
     }
     if (op === Rclose) {

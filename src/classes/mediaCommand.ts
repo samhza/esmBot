@@ -18,7 +18,7 @@ import { runMediaJob } from "#utils/media.js";
 import mediaDetect from "#utils/mediadetect.js";
 import { clean, isEmpty, maxFileSize, random } from "#utils/misc.js";
 import { upload } from "#utils/tempimages.js";
-import type { ExtendedConstructedCommandOptions, MediaParams, MediaMeta, MediaTypes } from "#utils/types.js";
+import type { ExtendedConstructedCommandOptions, MediaParams, MediaMeta } from "#utils/types.js";
 import Command from "./command.ts";
 
 class MediaCommand extends Command {
@@ -252,7 +252,7 @@ class MediaCommand extends Command {
           name: "image",
           nameLocalizations: getAllLocalizations("image.flagNames.image"),
           type: Constants.ApplicationCommandOptionTypes.ATTACHMENT,
-          fileTypes: this.supportedTypes,
+          fileTypes: ["image"],
           description: "An image/GIF attachment",
           descriptionLocalizations: getAllLocalizations("image.flags.image"),
         },
@@ -305,8 +305,6 @@ class MediaCommand extends Command {
     "comic sans ms",
     "ubuntu",
   ];
-
-  static supportedTypes: MediaTypes[] = ["image"];
 
   static requiresImage = true;
   static requiresParam = false;

@@ -1,7 +1,7 @@
 import { Message } from "oceanic.js";
 import Command from "#cmd-classes/command.js";
 import { selectedImages } from "#utils/collections.js";
-import { request } from "#utils/media.js";
+import { findMedia } from "#utils/media.js";
 import imageDetect from "#utils/mediadetect.js";
 
 class SelectImageCommand extends Command {
@@ -16,14 +16,7 @@ class SelectImageCommand extends Command {
     if (typeof mediaArr === "string") return mediaArr;
     if (mediaArr.length === 0) return this.getString("image.couldNotFind");
 
-    let final;
-    for (const media of mediaArr) {
-      const type = await request(new URL(media.path), ["image"], true).catch(() => {});
-      if (type) {
-        final = media;
-        break;
-      }
-    }
+    const final = await findMedia(mediaArr);
     if (!final) return this.getString("image.couldNotFind");
 
     selectedImages.set(this.author.id, final);

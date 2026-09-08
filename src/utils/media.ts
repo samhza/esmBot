@@ -2,13 +2,13 @@ import { Buffer } from "node:buffer";
 import { lookup } from "node:dns/promises";
 import fs from "node:fs";
 import process from "node:process";
-import { fileTypeStream, type AnyWebReadableByteStreamWithFileType } from "file-type";
+import { fileTypeStream } from "file-type";
 import ipaddr from "ipaddr.js";
 import logger from "./logger.ts";
 import MediaConnection from "./mediaConnection.ts";
 import run from "./mediaRunner.ts";
 import { random } from "./misc.ts";
-import { mediaTypes, type MediaParams, type MediaTypes } from "./types.ts";
+import type { MediaMeta, MediaParams } from "./types.ts";
 
 let mediaLib: import("./mediaLib.ts").MediaLib | undefined;
 
@@ -19,9 +19,7 @@ interface ServerConfig {
   tls?: boolean;
 }
 
-export const formats = {
-  image: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/heif"],
-};
+const allowedFormats = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/heif"];
 export const connections = new Map<string, MediaConnection>();
 export let servers: ServerConfig[] = [];
 
@@ -31,155 +29,91 @@ export async function initMediaLib() {
   mediaLib = media;
 }
 
-export async function request(
-  media: URL,
-  typeMedia: MediaTypes[],
-  typeOnly: true,
-): Promise<
-  | {
-      url: string;
-      type: string;
-      mediaType: MediaTypes;
-      ext: string;
-    }
-  | undefined
->;
-export async function request(
-  media: URL,
-  typeMedia: MediaTypes[],
-  typeOnly: false,
-): Promise<
-  | {
-      buf: Buffer;
-      url: string;
-      type: string;
-      mediaType: MediaTypes;
-      ext: string;
-    }
-  | undefined
->;
-export async function request(
-  media: URL,
-  typeMedia: MediaTypes[],
-  typeOnly = false,
-): Promise<
-  | {
-      buf?: Buffer;
-      url: string;
-      type: string;
-      mediaType: MediaTypes;
-      ext: string;
-    }
-  | undefined
-> {
-  // verify that IP address is valid
+const MAX_SIZE = 41943040; // 40 MB
+
+export interface MediaData {
+  type: string;
+  data: ArrayBuffer;
+}
+
+interface OpenedMedia {
+  type: string;
+  stream: ReadableStream<Uint8Array>;
+}
+
+function limitSize(max: number) {
+  let total = 0;
+  return new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      total += chunk.byteLength;
+      if (total > max) throw "large";
+      controller.enqueue(chunk);
+    },
+  });
+}
+
+async function isUnicast(host: string): Promise<boolean> {
   try {
-    const remoteIP = await lookup(media.host);
-    const parsedIP = ipaddr.parse(remoteIP.address);
-    if (parsedIP.range() !== "unicast") return;
+    return ipaddr.parse((await lookup(host)).address).range() === "unicast";
   } catch (e) {
     const err = e as Error;
-    if ("code" in err && err.code === "ENOTFOUND") return;
+    if ("code" in err && err.code === "ENOTFOUND") return false;
     throw e;
   }
+}
 
-  let url: string;
-  let stream: AnyWebReadableByteStreamWithFileType;
-
-  let size = 0;
+async function open(media: URL): Promise<OpenedMedia | undefined> {
+  // verify that IP address is valid
+  if (!(await isUnicast(media.host))) return;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, 15000);
+  const res = await fetch(media, {
+    signal: AbortSignal.any([controller.signal, AbortSignal.timeout(60000)]),
+    headers: {
+      "User-Agent": `Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com) esmBot/${process.env.ESMBOT_VER}`,
+    },
+  });
+
+  let opened: OpenedMedia | undefined;
   try {
-    const res = await fetch(media, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": `Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com) esmBot/${process.env.ESMBOT_VER}`,
-      },
-    });
-    clearTimeout(timeout);
-    url = res.url;
     if (res.status === 429) throw "ratelimit";
 
-    if (res.redirected) {
-      const redirectHost = new URL(res.url).host;
-      const remoteIP = await lookup(redirectHost);
-      const parsedIP = ipaddr.parse(remoteIP.address);
-      if (parsedIP.range() !== "unicast") return;
-    }
+    if (res.redirected && !(await isUnicast(new URL(res.url).host))) return;
 
-    if (res.headers.has("content-range")) {
-      const contentRange = res.headers.get("content-range");
-      if (contentRange) size = Number.parseInt(contentRange.split("/")[1]);
-    } else if (res.headers.has("content-length")) {
-      const contentLength = res.headers.get("content-length");
-      if (contentLength) size = Number.parseInt(contentLength);
-    }
-
-    if (size > 41943040) {
-      // 40 MB
-      throw "large";
-    }
+    const range = res.headers.get("content-range")?.split("/")[1];
+    if (Number.parseInt(range ?? res.headers.get("content-length") ?? "0") > MAX_SIZE) throw "large";
 
     if (!res.body) return;
 
-    stream = await fileTypeStream(res.body, { sampleSize: 1024 });
-    if (!stream.fileType?.mime) {
-      await stream.cancel();
-      return;
-    }
+    const stream = await fileTypeStream(res.body, { sampleSize: 1024 });
+    const type = stream.fileType?.mime;
+    if (!type || !allowedFormats.includes(type)) return;
+
+    opened = { stream, type };
+    return opened;
   } finally {
-    clearTimeout(timeout);
+    if (!opened) controller.abort();
   }
+}
 
-  if (typeMedia.length === 0) {
-    typeMedia = mediaTypes.slice(0); // clone array
-  }
-
-  if (!typeMedia.flatMap((v) => formats[v]).includes(stream.fileType.mime)) {
-    await stream.cancel();
-    return;
-  }
-
-  const mediaType = stream.fileType.mime.split("/")[0] as MediaTypes;
-  if (!typeMedia.includes(mediaType)) {
-    await stream.cancel();
-    return;
-  }
-
-  const type = stream.fileType.mime;
-  const ext = stream.fileType.ext;
-  if (typeOnly) {
-    await stream.cancel();
-    return { url, type, ext, mediaType };
-  }
-
-  const reader = stream.getReader();
-  const bufs: Uint8Array[] = [];
-  let bufSize = 0;
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    bufs.push(value);
-    bufSize += value.byteLength;
-
-    if (size && bufSize >= size) break;
-
-    if (bufSize > 41943040) {
-      await stream.cancel();
-      // 40 MB
-      throw "large";
+export async function findMedia(inputs: MediaMeta[]): Promise<MediaMeta | undefined> {
+  for (const input of inputs) {
+    try {
+      const res = await open(new URL(input.path));
+      if (!res) continue;
+      await res.stream.cancel();
+      return input;
+    } catch {
+      // try the next
     }
   }
+}
 
-  if (!stream.locked) await stream.cancel();
-
-  const buf = Buffer.concat(bufs);
-  return { buf, ext, url, type, mediaType };
+export async function request(media: URL): Promise<MediaData | undefined> {
+  const res = await open(media);
+  if (!res) return;
+  const data = await new Response(res.stream.pipeThrough(limitSize(MAX_SIZE))).arrayBuffer();
+  return { data, type: res.type };
 }
 
 function connect(server: string, auth: string | undefined, name: string | undefined, tls?: boolean) {
@@ -227,7 +161,7 @@ async function getIdeal(object: MediaParams): Promise<MediaConnection | undefine
     if (connection.conn.readyState !== 1) {
       continue;
     }
-    if (!connection.types[object.cmd] || connection.types[object.cmd].length === 0) {
+    if (!connection.commands.has(object.cmd)) {
       idealServers.push(undefined);
       continue;
     }
@@ -278,17 +212,14 @@ export async function runMediaJob(params: MediaParams): Promise<{ buffer: Buffer
       spoiler: false,
     };
   }
-  if (run) {
-    // Called from command (not using media API)
-    running++;
-    const data = await run(params).finally(() => {
-      running--;
-      if (running < 0) running = 0;
-      if (mediaLib && running === 0) {
-        mediaLib.trim();
-      }
-    });
-    return data;
-  }
-  throw "media_not_working";
+  // Called from command (not using media API)
+  running++;
+  const data = await run(params).finally(() => {
+    running--;
+    if (running < 0) running = 0;
+    if (mediaLib && running === 0) {
+      mediaLib.trim();
+    }
+  });
+  return data;
 }

@@ -65,9 +65,6 @@ export type Param =
     }
   | string;
 
-export const mediaTypes = ["image"] as const;
-export type MediaTypes = (typeof mediaTypes)[number];
-
 export interface MediaParams {
   cmd: string;
   params: {
@@ -93,17 +90,9 @@ export interface JobOutput {
 }
 
 export interface MediaFormats {
-  image?: {
+  [type: string]: {
     [cmd: string]: string[];
   };
-}
-
-export interface MediaFuncs {
-  image?: string[];
-}
-
-export interface MediaFuncTypes {
-  [cmd: string]: MediaTypes[];
 }
 
 export interface SearXNGResults {

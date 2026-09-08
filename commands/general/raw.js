@@ -1,5 +1,5 @@
 import Command from "#cmd-classes/command.js";
-import { request } from "#utils/media.js";
+import { findMedia } from "#utils/media.js";
 import mediaDetect from "#utils/mediadetect.js";
 
 class RawCommand extends Command {
@@ -11,14 +11,7 @@ class RawCommand extends Command {
       return this.getString("commands.responses.raw.noInput");
     }
 
-    let final;
-    for (const media of mediaArr) {
-      const type = await request(new URL(media.path), ["image"], true).catch(() => {});
-      if (type) {
-        final = media;
-        break;
-      }
-    }
+    const final = await findMedia(mediaArr);
     if (!final) return this.getString("image.couldNotFind");
 
     return final.path;

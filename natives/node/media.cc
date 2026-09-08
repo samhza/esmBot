@@ -23,27 +23,17 @@ namespace backward {
 
 using namespace std;
 
-string getDefaultType(string cmdType) {
-  if (cmdType == "image") {
-    return "png";
-  }
-  return "";
-}
+const string defaultType = "png";
 
 Napi::Value ProcessMedia(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
-  string cmdType = info[0].As<Napi::String>().Utf8Value();
-  string command = info[1].As<Napi::String>().Utf8Value();
-  Napi::Object obj = info[2].As<Napi::Object>();
-  Napi::Object input = info[3].As<Napi::Object>();
+  string command = info[0].As<Napi::String>().Utf8Value();
+  Napi::Object obj = info[1].As<Napi::Object>();
+  Napi::Object input = info[2].As<Napi::Object>();
   Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
 
-  string type = input.Has("type") ? input.Get("type").As<Napi::String>().Utf8Value() : getDefaultType(cmdType);
-  if (type == "") {
-    deferred.Reject(Napi::Error::New(env, "Job type \"" + cmdType + "\" is unknown").Value());
-    return deferred.Promise();
-  }
+  string type = input.Has("type") ? input.Get("type").As<Napi::String>().Utf8Value() : defaultType;
 
   esmb::ArgumentMap Arguments;
 
@@ -123,8 +113,6 @@ void *checkTypes(GType type, Napi::Array *formats) {
 }
 
 Napi::Value MediaInit(const Napi::CallbackInfo &info) {
-  Napi::Object formats = Napi::Object::New(info.Env());
-
 #if __GLIBC__
   /*
     Set mmap threshold to 128kb to work around a similar glibc bug to the one above.
@@ -154,9 +142,8 @@ Napi::Value MediaInit(const Napi::CallbackInfo &info) {
   vips_operation_block_set("VipsForeignLoadHeif", false);
 #endif
 
-  Napi::Array imgFormats = Napi::Array::New(info.Env());
-  vips_type_map_all(g_type_from_name("VipsForeignLoad"), (VipsTypeMapFn)checkTypes, &imgFormats);
-  formats.Set("image", imgFormats);
+  Napi::Array formats = Napi::Array::New(info.Env());
+  vips_type_map_all(g_type_from_name("VipsForeignLoad"), (VipsTypeMapFn)checkTypes, &formats);
   return formats;
 }
 
@@ -165,10 +152,9 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "init"), Napi::Function::New(env, MediaInit));
   exports.Set(Napi::String::New(env, "trim"), Napi::Function::New(env, Trim));
 
-  Napi::Object funcs = Napi::Object::New(env);
   size_t i = 0;
 
-  Napi::Array imageFuncs = Napi::Array::New(env);
+  Napi::Array funcs = Napi::Array::New(env);
   for (auto const &imap : esmb::Image::FunctionMap) {
     Napi::HandleScope scope(env);
     Napi::Object func = Napi::Object::New(env);
@@ -176,7 +162,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     func.Set("input", Napi::Boolean::From(env, true));
     func.Set("anim", Napi::Boolean::From(env, std::count(esmb::Image::AnimFunctions.begin(),
                                                          esmb::Image::AnimFunctions.end(), imap.first) > 0));
-    imageFuncs[i] = func;
+    funcs[i] = func;
     i++;
   }
   for (auto const &imap : esmb::Image::NoInputFunctionMap) {
@@ -184,11 +170,9 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     Napi::Object func = Napi::Object::New(env);
     func.Set("name", Napi::String::New(env, imap.first));
     func.Set("input", Napi::Boolean::From(env, false));
-    imageFuncs[i] = func;
+    funcs[i] = func;
     i++;
   }
-  funcs.Set("image", imageFuncs);
-
   exports.Set(Napi::String::New(env, "funcs"), funcs);
 
   return exports;

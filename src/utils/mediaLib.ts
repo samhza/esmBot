@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { createRequire } from "node:module";
 import process from "node:process";
-import type { MediaParams, MediaTypes } from "./types.ts";
+import type { MediaParams } from "./types.ts";
 
 export interface FuncObject {
   name: string;
@@ -10,12 +10,9 @@ export interface FuncObject {
 }
 
 export interface MediaLib {
-  funcs: {
-    image: FuncObject[];
-  };
+  funcs: FuncObject[];
 
   process(
-    type: MediaTypes,
     cmd: string,
     params: MediaParams["params"],
     input: {
@@ -23,9 +20,7 @@ export interface MediaLib {
       type?: string;
     },
   ): Promise<{ data: Buffer; type: string }>;
-  init(): {
-    image?: string[];
-  };
+  init(): string[];
   trim(): number;
 }
 

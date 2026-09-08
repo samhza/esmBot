@@ -141,13 +141,12 @@ wss.on("connection", (ws, request) => {
   ws.binaryType = "nodebuffer";
   const cur = Buffer.alloc(2);
   cur.writeUInt16LE(jobs.size);
-  const cmdFormats: MediaFormats = {};
-  if (media.funcs.image && formats.image) {
-    cmdFormats.image = {};
-    for (const cmd of media.funcs.image) {
-      cmdFormats.image[cmd.name] = formats.image;
-    }
+
+  const cmdFormats: MediaFormats = { image: {} };
+  for (const cmd of media.funcs) {
+    cmdFormats.image[cmd.name] = formats;
   }
+
   const init = Buffer.concat([
     Buffer.from([Rinit]),
     Buffer.from([0x00, 0x00, 0x00, 0x00]),
