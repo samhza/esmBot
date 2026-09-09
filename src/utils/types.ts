@@ -65,7 +65,8 @@ export type Param =
     }
   | string;
 
-export type MediaTypes = "image";
+export const mediaTypes = ["image"] as const;
+export type MediaTypes = (typeof mediaTypes)[number];
 
 export interface MediaParams {
   cmd: string;

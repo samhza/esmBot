@@ -8,7 +8,7 @@ import logger from "./logger.ts";
 import MediaConnection from "./mediaConnection.ts";
 import run from "./mediaRunner.ts";
 import { random } from "./misc.ts";
-import type { MediaParams, MediaTypes } from "./types.ts";
+import { mediaTypes, type MediaParams, type MediaTypes } from "./types.ts";
 
 let mediaLib: import("./mediaLib.ts").MediaLib | undefined;
 
@@ -134,9 +134,11 @@ export async function request(
     clearTimeout(timeout);
   }
 
-  if (
-    ![...(typeMedia.length === 0 ? formats.image : typeMedia.flatMap((v) => formats[v]))].includes(stream.fileType.mime)
-  ) {
+  if (typeMedia.length === 0) {
+    typeMedia = mediaTypes.slice(0); // clone array
+  }
+
+  if (!typeMedia.flatMap((v) => formats[v]).includes(stream.fileType.mime)) {
     await stream.cancel();
     return;
   }
