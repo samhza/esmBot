@@ -54,9 +54,8 @@ export async function upload(client: Client, result: File & { flags?: number }, 
 
     // save media if used outside of guild/dms
     if (context.authorizingIntegrationOwners[0] === undefined) {
-      const type = await request(new URL(imageURL), [], true).catch(() => {});
       selectedImages.set(authorId, {
-        path: type?.url ?? imageURL,
+        path: imageURL,
         spoiler: result.name.startsWith("SPOILER_"),
       });
     }
