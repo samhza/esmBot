@@ -43,7 +43,7 @@ export default async function run(object: MediaParams): Promise<JobOutput> {
     input ? { data: input.data, type: mimeToExt(input.type) } : {},
   );
   return {
-    buffer: data,
+    buffer: data,request
     type,
     spoiler,
   };
