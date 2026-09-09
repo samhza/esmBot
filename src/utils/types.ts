@@ -75,7 +75,6 @@ export interface MediaParams {
   };
   id: string;
   inputs: MediaMeta[];
-  ephemeral?: boolean;
   spoiler?: boolean;
   token?: string;
   filesize?: number;
