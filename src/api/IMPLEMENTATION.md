@@ -63,7 +63,7 @@ The job object is formatted like this:
     ...
   },
   "id": string,         // identifier for the job object
-  "spoiler": string,    // whether to post the output as a spoiler (only when responding directly, see below section)
+  "spoiler": boolean,   // whether to post the output as a spoiler (only when responding directly, see below section)
   "token": string,      // the interaction token (only when responding directly, see below section)
   "filesize": number,   // maximum attachment size in bytes allowed for the response (only when responding directly, see below section)
 }
