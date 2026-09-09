@@ -20,7 +20,7 @@ export interface MediaLib {
       type?: string;
     },
   ): Promise<{ data: Buffer; type: string }>;
-  init(): string[];
+  init(): void;
   trim(): number;
 }
 

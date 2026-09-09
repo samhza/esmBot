@@ -10,7 +10,7 @@ import { media } from "#utils/mediaLib.js";
 import run from "#utils/mediaRunner.js";
 import type { JobOutput, MediaFormats, MediaParams } from "#utils/types.js";
 
-const formats = media.init();
+media.init();
 
 const cacheTimeout = 15 * 60 * 1000; // jobs are deleted 15 minutes after completion if not fetched
 
@@ -144,7 +144,7 @@ wss.on("connection", (ws, request) => {
 
   const cmdFormats: MediaFormats = { image: {} };
   for (const cmd of media.funcs) {
-    cmdFormats.image[cmd.name] = formats;
+    cmdFormats.image[cmd.name] = [];
   }
 
   const init = Buffer.concat([

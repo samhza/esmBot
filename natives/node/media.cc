@@ -98,20 +98,6 @@ Napi::Value Trim(const Napi::CallbackInfo &info) {
 #endif
 }
 
-void *checkTypes(GType type, Napi::Array *formats) {
-  Napi::Array arr = *formats;
-  VipsObjectClass *c = VIPS_OBJECT_CLASS(g_type_class_ref(type));
-  size_t i = 0;
-
-  if (strcmp(c->nickname, "jpegload")) arr[i++] = Napi::String::From(formats->Env(), "image/jpeg");
-  if (strcmp(c->nickname, "pngload")) arr[i++] = Napi::String::From(formats->Env(), "image/png");
-  if (strcmp(c->nickname, "gifload")) arr[i++] = Napi::String::From(formats->Env(), "image/gif");
-  if (strcmp(c->nickname, "webpload")) arr[i++] = Napi::String::From(formats->Env(), "image/webp");
-  if (strcmp(c->nickname, "heifload")) arr[i++] = Napi::String::From(formats->Env(), "image/avif");
-
-  return NULL;
-}
-
 Napi::Value MediaInit(const Napi::CallbackInfo &info) {
 #if __GLIBC__
   /*
@@ -142,9 +128,7 @@ Napi::Value MediaInit(const Napi::CallbackInfo &info) {
   vips_operation_block_set("VipsForeignLoadHeif", false);
 #endif
 
-  Napi::Array formats = Napi::Array::New(info.Env());
-  vips_type_map_all(g_type_from_name("VipsForeignLoad"), (VipsTypeMapFn)checkTypes, &formats);
-  return formats;
+  return info.Env().Undefined();
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
