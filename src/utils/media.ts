@@ -197,15 +197,7 @@ export function disconnect() {
 async function repopulate() {
   const data = await fs.promises.readFile(new URL("../../config/servers.json", import.meta.url), { encoding: "utf8" });
   const parsed = JSON.parse(data);
-  if (parsed.image) {
-    logger.warn('!!! THE "image" FIELD IN config/servers.json IS DEPRECATED !!!');
-    logger.warn(
-      'The "image" field has been renamed to "media". Please rename it in your config; esmBot will no longer read this field in a future version.',
-    );
-    servers = parsed.image;
-  } else {
-    servers = parsed.media;
-  }
+  servers = parsed.media;
 }
 
 export async function reloadMediaConnections() {
