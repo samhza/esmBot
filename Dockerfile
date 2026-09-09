@@ -39,6 +39,7 @@ RUN cp -a /built/* /
 # since the alpine package does not include liblqr support.
 RUN git clone https://github.com/ImageMagick/ImageMagick.git ~/ImageMagick \
     && cd ~/ImageMagick \
+    && git checkout $(git describe --abbrev=0) \
     && ./configure \
 		--prefix=/usr \
 		--disable-static \
