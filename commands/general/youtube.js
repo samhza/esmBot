@@ -1,6 +1,7 @@
 import Command from "#cmd-classes/command.js";
 import serversConfig from "#config/servers.json" with { type: "json" };
 import paginator from "#pagination";
+import logger from "#utils/logger.js";
 import { random } from "#utils/misc.js";
 
 class YouTubeCommand extends Command {
@@ -10,15 +11,33 @@ class YouTubeCommand extends Command {
     if (!query || !query.trim()) return this.getString("commands.responses.youtube.noInput");
     await this.acknowledge();
     const messages = [];
+    let server = random(serversConfig.search);
+    if (!server) {
+      if (!serversConfig.searx && serversConfig.searx.length === 0)
+        return this.getString("commands.responses.youtube.noEngines");
+      logger.warn('!!! THE "searx" FIELD IN config/servers.json IS DEPRECATED !!!');
+      logger.warn(
+        'The "searx" field has been renamed to "search" and has a different format. Please update your config; esmBot will no longer read this field in a future version.',
+      );
+      server = {
+        type: "searxng",
+        url: random(serversConfig.searx),
+      };
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => {
       controller.abort();
-    }, 5000);
+    }, 6000);
     /**
      * @type {import("#utils/types.ts").SearXNGResults}
      */
     const videos = await fetch(
-      `${random(serversConfig.searx)}/search?format=json&safesearch=1&categories=videos&q=!youtube%20${encodeURIComponent(query)}`,
+      new URL(
+        server.type === "degoog"
+          ? `/api/command?format=json&safeMode=on&q=!youtube_noapi%20${encodeURIComponent(query)}` // relies on searxng compatibility mode with the "Youtube Noapi" engine installed/enabled
+          : `/search?format=json&safesearch=2&categories=videos&q=!youtube%20${encodeURIComponent(query)}`,
+        server.url,
+      ),
       {
         signal: controller.signal,
       },
@@ -32,7 +51,7 @@ class YouTubeCommand extends Command {
             page: (i + 1).toString(),
             amount: videos.results.length.toString(),
           },
-        })}\n▶️ **${value.title.replaceAll("*", "\\*")}**\nUploaded by **${value.author?.replaceAll("*", "\\*") ?? "N/A"}**\n${value.url}`,
+        })}\n▶️ **${value.title.replaceAll("*", "\\*")}**${server.type === "degoog" ? "" : `\nUploaded by **${value.author?.replaceAll("*", "\\*") ?? "N/A"}**`}\n${value.url}`,
       });
     }
     this.success = true;

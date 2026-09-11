@@ -82,9 +82,12 @@ The JSON-based configuration files are located in `config/`.
       "tls": false // Whether or not this is a secure TLS/wss connection
     }
   ],
-  "searx": [
-    // URLs for Searx/SearXNG instances used for image/YouTube searches, e.g. "https://searx.projectlounge.pw"
-    // Note: instances must support getting results over JSON
+  "search": [ // Objects containing metasearch server info for the search commands (image and youtube)
+    {
+      "type": "searxng", // Metasearch server type (can be "searxng" or "degoog")
+      "url": "https://searx.projectlounge.pw", // Base HTTP/HTTPS URL for the server (instance must support getting results over JSON, degoog instances must have "Serve the SearXNG API shape" enabled)
+      "engines": ["google cse images", "startpage images"] // List of image search engine source IDs to query from (searxng only, check instance preferences page)
+    }
   ]
 }
 ```

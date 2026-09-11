@@ -1,6 +1,7 @@
 import Command from "#cmd-classes/command.js";
 import serversConfig from "#config/servers.json" with { type: "json" };
 import paginator from "#pagination";
+import logger from "#utils/logger.js";
 import { random } from "#utils/misc.js";
 
 class ImageSearchCommand extends Command {
@@ -11,26 +12,54 @@ class ImageSearchCommand extends Command {
     if (!query || !query.trim()) return this.getString("commands.responses.image.noInput");
     await this.acknowledge();
     const embeds = [];
+    let server = random(serversConfig.search);
+    if (!server) {
+      if (!serversConfig.searx && serversConfig.searx.length === 0)
+        return this.getString("commands.responses.image.noEngines");
+      logger.warn('!!! THE "searx" FIELD IN config/servers.json IS DEPRECATED !!!');
+      logger.warn(
+        'The "searx" field has been renamed to "search" and has a different format. Please update your config; esmBot will no longer read this field in a future version.',
+      );
+      server = {
+        type: "searxng",
+        url: random(serversConfig.searx),
+      };
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => {
       controller.abort();
-    }, 5000);
+    }, 6000);
     /**
      * @type {import("#utils/types.ts").SearXNGResults}
      */
     const rawImages = await fetch(
-      `${random(serversConfig.searx)}/search?format=json&safesearch=2&engines=startpage%20images,presearch%20images,dogpile%20images,privacywall%20images&q=${encodeURIComponent(query)}`,
+      new URL(
+        server.type === "degoog"
+          ? `/api/search?format=json&safeMode=on&type=images&q=${encodeURIComponent(query)}`
+          : `/search?format=json&safesearch=2&engines=${server.engines.map((e) => encodeURIComponent(e)).join(",")}&q=${encodeURIComponent(query)}`,
+        server.url,
+      ),
       {
         signal: controller.signal,
       },
     ).then((res) => res.json());
     clearTimeout(timeout);
     if (rawImages.results.length === 0) return this.getString("commands.responses.image.noResults");
-    const images = rawImages.results.filter(
-      (val) => val.img_src?.startsWith("https://") && val.url.startsWith("https://"),
-    );
+    const images = rawImages.results
+      .map((val) => {
+        if (!val.img_src) return;
+        if (!val.url.startsWith("https://")) return;
+        const canonURL =
+          server.type === "degoog" ? new URL(val.img_src, server.url).searchParams.get("url") : val.img_src;
+        if (!canonURL.startsWith("https://")) return;
+        return {
+          img_src: canonURL,
+          title: val.title,
+          url: val.url,
+        };
+      })
+      .filter(Boolean);
     for (const [i, value] of images.entries()) {
-      if (!value.img_src) throw Error("Image not found despite filter");
       embeds.push({
         embeds: [
           {
