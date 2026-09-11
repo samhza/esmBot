@@ -634,9 +634,6 @@
                 "totalServers": "Tổng cộng máy chủ:",
                 "translate": "Dịch:"
             },
-            "nowplaying": {
-                "noTrack": "Đã có sự cố khi lấy bài hát hiện tại."
-            },
             "ping": {
                 "shardLatency": "Độ trễ của Shard: {{latency}}ms",
                 "latency": "Độ trễ: {{latency}}ms",
@@ -704,8 +701,6 @@
                 "added": "Thẻ với tên `{{name}}` đã được thêm vô!",
                 "edited": "Thẻ với tên `{{name}}` đã được chỉnh sửa!",
                 "editName": "Bạn phải cung cấp tên thẻ mà bạn muốn chỉnh!",
-                "deleteName": "Bạn phải cung cấp tên thẻ mà bạn muốn xóa!",
-                "ownerName": "Bạn phải cung cấp tên của thẻ mà bạn muốn kiểm tra chủ sở hữu!",
                 "ownedBy": "Thẻ này thuộc sở hữu của **{{user}}** (`{{id}}`).",
                 "ownedById": "Mình không thể tìm ra ai là chủ sở hữu của thẻ này, nhưng mình đã lấy được ID của người dùng đó: `{{id}}`",
                 "missingRole": "Không thể gỡ vai trò vì nó chưa từng được thêm!",
@@ -984,21 +979,17 @@
             "link": "link",
             "spoiler": "tietlo",
             "text": "noidung",
-            "togif": "sanggif",
-            "media": "media"
+            "togif": "sanggif"
         },
-        "tempImageSent": "Ảnh của bạn đây nhé!",
         "notWorking": "Có vẻ như mình không thể xử lý được tấm ảnh này, điều này có thể do cấu hình của mình chưa được thiết lập đúng cách. Bạn có thể liên hệ với người sở hữu bot để được hỗ trợ.",
         "couldNotFind": "Mình không thể tìm thấy ảnh trong tin nhắn ấy!",
-        "empty": "Kết quả được trở về là trống!",
         "flags": {
             "image": "Ảnh/GIF đính kèm",
             "link": "URL của ảnh/GIF",
             "ephemeral": "Thử gửi kết quả dưới dạng phản hồi tạm thời",
             "spoiler": "Thử gửi kết quả dưới dạng tiết lộ",
             "text": "Chữ mà sẽ được chèn lên ảnh",
-            "togif": "Bắt kết quả là GIF",
-            "media": "Một tệp media đính kèm"
+            "togif": "Bắt kết quả là GIF"
         },
         "nocmd": "Lệnh đó không được hỗ trợ trên phiên esmBot này.",
         "frames": "Tấm GIF này có quá nhiều khung hình (hơn 1000)!",
@@ -1067,8 +1058,7 @@
         "no": "Không",
         "node": "Node",
         "noVoiceState": "Bạn phải ở trong một kênh thoại trước!",
-        "nowPlaying": "Đang phát",
-        "noYouTube": "Phát lại từ YouTube đã bị vô hiệu hóa trên phiên này."
+        "nowPlaying": "Đang phát"
     },
     "tooLarge": "Kết quả có kích thước quá lơn, nên đây là tệp của nó:",
     "noDatabase": "Lệnh này không khả dụng trên các phiên bản không trạng thái (stateless) của esmBot.",

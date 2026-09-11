@@ -844,9 +844,6 @@
                 "notLooping": "Le lecteur ne tourne plus en boucle.",
                 "nowLooping": "Le lecteur tourne maintenant en boucle."
             },
-            "nowplaying": {
-                "noTrack": "Un problème est survenu lors de la récupération du morceau en cours."
-            },
             "ping": {
                 "latency": "Latence: {{latency}}ms",
                 "pong": "Pong !",
@@ -930,15 +927,13 @@
         }
     },
     "image": {
-        "empty": "Le résultat obtenu était vide !",
         "flagNames": {
             "ephemeral": "éphémère",
             "image": "image",
             "link": "lien",
             "spoiler": "spoiler",
             "text": "texte",
-            "togif": "versgif",
-            "media": "média"
+            "togif": "versgif"
         },
         "flags": {
             "image": "Une image/un GIF en pièce jointe",
@@ -959,7 +954,6 @@
         "ratelimit": "J'ai été limité par le serveur hébergeant cette image. Essayez de télécharger votre image ailleurs.",
         "selected": "L'image a été sélectionnée pour votre prochaine commande.",
         "slowDown": "S'il vous plaît, ralentissez un peu.",
-        "tempImageSent": "Voici votre image !",
         "tip": "(Astuce : essayez de cliquer avec le bouton droit de la souris/de maintenir enfoncé un message et d'appuyer sur Applications -> {{name}} -> Sélectionner une image, puis réessayez.)",
         "tooLarge": "Le fichier résultant était trop volumineux pour être téléchargé. Réessayez avec une image plus petite si possible.",
         "unknown": "Le résultat n'était pas dans un format valide. Veuillez réessayer.",
@@ -1010,7 +1004,6 @@
         "waitingForHost": "J'attends 10 secondes que l'hôte revienne...",
         "yes": "Oui",
         "notConnected": "Je ne suis connecté à aucun serveur audio !",
-        "noYouTube": "La lecture YouTube est désactivée sur cette instance.",
         "error": "Il semble qu'il y ait eu une erreur lors de la lecture du son :",
         "noSong": "Je n'ai pas pu trouver cette musique !",
         "waitingForSomeone": "Attendre 10 secondes que quelqu'un revienne...",

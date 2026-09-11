@@ -864,9 +864,6 @@
       "music": {
         "invalid": "That isn't a valid music command!"
       },
-      "nowplaying": {
-        "noTrack": "There was an issue getting the current track."
-      },
       "ping": {
         "latency": "Latency: {{latency}}ms",
         "ping": "Ping?",
@@ -956,7 +953,6 @@
         "added": "The tag `{{name}}` has been added!",
         "addName": "You need to provide the name of the tag you want to add!",
         "deleted": "The tag `{{name}}` has been deleted!",
-        "deleteName": "You need to provide the name of the tag you want to delete!",
         "edited": "The tag `{{name}}` has been edited!",
         "editName": "You need to provide the name of the tag you want to edit!",
         "exists": "This tag already exists!",
@@ -973,7 +969,6 @@
         "notOwnerRole": "You need to have the \"Manage Messages\" permission to add/remove tag roles!",
         "ownedBy": "This tag is owned by **{{user}}** (`{{id}}`).",
         "ownedById": "I couldn't find exactly who owns this tag, but I was able to get their ID: `{{id}}`",
-        "ownerName": "You need to provide the name of the tag you want to check the owner of!",
         "roleAdded": "The role `{{name}}` has been added to the list of allowed roles.",
         "roleList": "Allowed Roles",
         "roleRemoved": "The role `{{name}}` has been removed from the list of allowed roles."
@@ -998,12 +993,10 @@
   "image": {
     "animatedAVIF": "Animated AVIF files are currently unsupported.",
     "couldNotFind": "I couldn't find an image in that message!",
-    "empty": "The resulting output was empty!",
     "flagNames": {
       "ephemeral": "ephemeral",
       "image": "image",
       "link": "link",
-      "media": "media",
       "spoiler": "spoiler",
       "text": "text",
       "togif": "togif"
@@ -1012,7 +1005,6 @@
       "ephemeral": "Attempt to send output as an ephemeral/temporary response",
       "image": "An image/GIF attachment",
       "link": "An image/GIF URL",
-      "media": "A media attachment",
       "spoiler": "Attempt to send output as a spoiler",
       "text": "The text to put on the image",
       "togif": "Force GIF output"
@@ -1032,7 +1024,6 @@
     "ratelimit": "I've been ratelimited by the server hosting that image. Try uploading your image somewhere else.",
     "selected": "The image has been selected for your next command.",
     "slowDown": "Please slow down a bit.",
-    "tempImageSent": "Here's your image!",
     "tempSite": "The result was larger than Discord's upload limit, so it was uploaded to an external site instead.",
     "timeout": "The request to get that image timed out. Please try again, upload your image elsewhere, or use another image.",
     "timeoutDownload": "The request timed out before I could download that image. Try uploading your image somewhere else or reducing its size.",
@@ -1081,7 +1072,6 @@
     "notVoiceChannel": "The channel I was given isn't a voice channel!",
     "noVoiceState": "You need to be in a voice channel first!",
     "nowPlaying": "Now Playing",
-    "noYouTube": "YouTube playback is disabled on this instance.",
     "queue": "Queue",
     "serversDown": "Hmmm, seems that all of the audio servers are down. Try again in a bit.",
     "title": "Title",

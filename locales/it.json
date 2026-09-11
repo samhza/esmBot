@@ -877,7 +877,6 @@
             "tags": {
                 "addName": "Devi fornire il nome del tag che vuoi aggiungere!",
                 "deleted": "Il tag `{{name}}` è stato eliminato!",
-                "deleteName": "Devi fornire il nome del tag che vuoi eliminare!",
                 "added": "Il tag `{{name}}` è stato aggiunto!",
                 "edited": "Il tag `{{name}}` è stato modificato!",
                 "editName": "Devi fornire il nome del tag che vuoi modificare!",
@@ -890,7 +889,6 @@
                 "notOwner": "Non possiedi questo tag!",
                 "ownedBy": "Questo tag è posseduto da **{{user}}** (`{{id}}`).",
                 "ownedById": "Non ho potuto trovare esattamente chi possiede questo tag, ma ho potuto trovarne l'ID: `{{id}}`",
-                "ownerName": "Devi fornire il nome del tag di cui vuoi controllare il proprietario!",
                 "noRolePerms": "Non hai il permesso di creare tag!",
                 "noRoles": "Nessun ruolo ha attualmente il permesso di gestire i tag!",
                 "notOwnerRole": "Devi avere il permesso \"Gestire messaggi\" per aggiungere/rimuovere ruoli tag!",
@@ -963,9 +961,6 @@
                 "invalid": "Quello non è uno snowflake valido!",
                 "noInput": "Devi fornire un ID snowflake!"
             },
-            "nowplaying": {
-                "noTrack": "Si è verificato un problema nel recupero della traccia attuale."
-            },
             "watermark": {
                 "invalid": "Devi fornire il tipo di watermark da aggiungere!"
             },
@@ -992,15 +987,13 @@
         "noServers": "Non sto riuscendo a contattare i server di elaborazione media, potrebbero essere spenti o in fase di avvio. Per piacere, attendi un attimo.",
         "noParam": "Devi fornire del testo!",
         "couldNotFind": "Non ho potuto trovare un'immagine in quel messaggio!",
-        "empty": "L'output risultante era vuoto!",
         "flagNames": {
             "ephemeral": "effimero",
             "image": "immagine",
             "link": "link",
             "spoiler": "spoiler",
             "text": "testo",
-            "togif": "agif",
-            "media": "media"
+            "togif": "agif"
         },
         "flags": {
             "ephemeral": "Prova a mandare il risultato come una risposta effimera/temporanea",
@@ -1008,8 +1001,7 @@
             "link": "Un URL immagine/GIF",
             "spoiler": "Prova a mandare il risultato come uno spoiler",
             "text": "Il testo da mettere sull'immagine",
-            "togif": "Forza risultato GIF",
-            "media": "Un media in allegato"
+            "togif": "Forza risultato GIF"
         },
         "frames": "Quella GIF ha ben troppi fotogrammi (più di 1000)!",
         "jobEnded": "È successo qualcosa ai server di elaborazione media prima che potessi ricevere il risultato. Prova ad eseguire il tuo comando di nuovo.",
@@ -1021,7 +1013,6 @@
         "tooLong": "L'immagine sta richiedendo troppo per essere elaborata (>=10 minuti), quindi il lavoro è stato annullato. Prova ad usare un'immagine più piccola.",
         "selected": "L'immagine è stata selezionata per il tuo prossimo comando.",
         "slowDown": "Per piacere, rallenta un po'.",
-        "tempImageSent": "Ecco la tua immagine!",
         "tempSite": "Il file risultante era più grande del limite di upload di Discord, quindi è stato invece inviato a un sito esterno.",
         "timeout": "La richiesta di recuperare quell'immagine è scaduta. Per piacere, prova di nuovo, carica la tua immagine altrove, o usa un'immagine diversa.",
         "processing": "Elaborazione... Questo potrebbe richiedere un po'",
@@ -1056,7 +1047,6 @@
         "nowPlaying": "In Riproduzione",
         "yes": "Sì",
         "queue": "Coda",
-        "noYouTube": "La riproduzione da YouTube è disattivata su questa istanza.",
         "serversDown": "Hmmm, sembra che tutti i server audio siano spenti. Riprova tra un attimo.",
         "title": "Titolo",
         "unknown": "Sconosciuto",

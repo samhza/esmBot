@@ -827,9 +827,6 @@
                 "noUserBanner": "Tällä käyttäjällä ei ole banneria!",
                 "noSelfBanner": "Sinulla ei ole banneria!"
             },
-            "nowplaying": {
-                "noTrack": "Löytyi ongelma tämänhetkisen kappaleen löytämisessä."
-            },
             "ping": {
                 "latency": "Viive: {{latency}}ms",
                 "ping": "Ping?",
