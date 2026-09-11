@@ -879,6 +879,9 @@
         "current": "The current prefix is `{{prefix}}`.",
         "stateless": "Setting a per-guild prefix is not possible on a stateless instance of esmBot!"
       },
+      "qr": {
+        "invalid": "You need to specify whether you want to create or read a QR code!"
+      },
       "raw": {
         "noInput": "You need to provide an image/GIF to get a raw URL!"
       },
@@ -955,6 +958,7 @@
         "deleted": "The tag `{{name}}` has been deleted!",
         "edited": "The tag `{{name}}` has been edited!",
         "editName": "You need to provide the name of the tag you want to edit!",
+        "existingRole": "That role already has permission to manage tags!",
         "exists": "This tag already exists!",
         "invalid": "That tag doesn't exist!",
         "invalidName": "You can't make a tag with that name!",
