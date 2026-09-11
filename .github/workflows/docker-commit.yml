@@ -13,19 +13,8 @@ jobs:
     if: github.repository == 'esmBot/esmBot'
     uses: ./.github/workflows/docker.yml
     with:
-      lqr: true
       stable: false
       tags: |
         type=raw,value=edge
         type=sha
-    secrets: inherit
-
-  build-no-lqr:
-    if: github.repository == 'esmBot/esmBot'
-    uses: ./.github/workflows/docker.yml
-    with:
-      stable: false
-      tags: |
-        type=raw,value=edge-no-lqr
-        type=sha,suffix=-no-lqr
     secrets: inherit

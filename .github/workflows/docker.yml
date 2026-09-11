@@ -6,9 +6,6 @@ on:
       stable:
         type: boolean
         default: false
-      lqr:
-        type: boolean
-        default: false
       tags:
         type: string
 
@@ -55,12 +52,19 @@ jobs:
         with:
           context: .
           push: true
+          # Published images always ship liblqr. The Dockerfile keeps the LQR
+          # arg so local builds can still opt out.
           build-args: |
-            LQR=${{ inputs.lqr && '1' || '0' }}
+            LQR=1
           platforms: ${{ matrix.platform.key }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ env.REGISTRY_IMAGE }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          # mode=max caches all intermediate stages (the liblqr build, the pnpm
+          # install, the natives build), not just layers reachable from the
+          # final image.
+          cache-from: type=gha,scope=${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=${{ env.PLATFORM_PAIR }}
 
       - name: Export digest
         run: |
@@ -70,7 +74,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v7
         with:
-          name: digests-${{ env.PLATFORM_PAIR }}-${{ inputs.lqr && 'lqr' || 'no-lqr' }}
+          name: digests-${{ env.PLATFORM_PAIR }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -85,7 +89,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*-${{ inputs.lqr && 'lqr' || 'no-lqr' }}
+          pattern: digests-*
           merge-multiple: true
 
       - name: Login to GHCR

@@ -23,21 +23,39 @@ FROM base AS native-build-1
 RUN apk add --no-cache git cmake python3 alpine-sdk libtool glib-dev \
 		fontconfig-dev vips-dev zxing-cpp-dev
 
-# liblqr needs to be built manually since alpine doesn't have it in their repos
-RUN git clone https://github.com/carlobaldassi/liblqr ~/liblqr \
+# liblqr needs to be built manually since alpine doesn't have it in their repos.
+# This is the expensive stage, and it only depends on the base image, so it stays
+# cached until the base image itself changes.
+RUN git clone --depth 1 https://github.com/carlobaldassi/liblqr ~/liblqr \
 		&& cd ~/liblqr \
 		&& ./configure --prefix=/usr \
 		&& make -j$(nproc) \
-		&& make DESTDIR=/built install
+		&& make DESTDIR=/built install \
+		&& rm -rf ~/liblqr
 
 RUN cp -a /built/* /
 
 FROM native-build-${LQR} AS build
 ARG LQR
-COPY . /app
+# Each COPY below pulls in only what the step after it actually reads, so that
+# touching an unrelated file doesn't invalidate an expensive layer. The natives
+# build in particular is by far the slowest step here, so it goes first and sees
+# only the files it compiles from.
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml /app/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Rebuilt only when natives/, CMakeLists.txt or the package version change.
 # Detect liblqr usage and adjust build accordingly
-RUN if [[ "$LQR" -eq "1" ]] ; then pnpm run build --CDWITH_BACKWARD=OFF ; else pnpm run build:no-lqr --CDWITH_BACKWARD=OFF ; fi
+COPY CMakeLists.txt /app/
+COPY natives /app/natives
+RUN if [ "$LQR" = "1" ] ; then pnpm run build:natives --CDWITH_BACKWARD=OFF ; else pnpm run build:natives:no-lqr --CDWITH_BACKWARD=OFF ; fi
+
+# Rebuilt only when src/, config/ or tsconfig.json change. config/ is here
+# because tsconfig maps #config/* onto it, so tsc reads it at compile time.
+COPY tsconfig.json /app/
+COPY config /app/config
+COPY src /app/src
+RUN pnpm run build:ts
 
 FROM native-build-${LQR} AS prod-deps
 COPY package.json /app/

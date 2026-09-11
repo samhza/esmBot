@@ -13,17 +13,7 @@ jobs:
   build:
     uses: ./.github/workflows/docker.yml
     with:
-      lqr: true
       stable: true
       tags: |
         type=semver,pattern={{version}}
-    secrets: inherit
-
-  build-no-lqr:
-    uses: ./.github/workflows/docker.yml
-    with:
-      stable: false
-      tags: |
-        type=raw,value=no-lqr
-        type=semver,pattern={{version}},suffix=-no-lqr
     secrets: inherit

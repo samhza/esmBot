@@ -43,8 +43,30 @@ jobs:
         if: contains(matrix.platform.key, 'macos')
         run: brew install liblqr vips
 
-      - name: Build
-        run: pnpm install --frozen-lockfile && pnpm run build
+      - name: Record native dependency versions
+        id: nativedeps
+        run: |
+          versions="$(pkg-config --modversion vips-cpp lqr-1 2>/dev/null | tr '\n' '-' || true)"
+          echo "versions=${versions:-unknown}" >> "$GITHUB_OUTPUT"
+      - name: Cache built natives
+        id: natives
+        uses: actions/cache@v6
+        with:
+          path: build/Release/esmbmedia.node
+          # Exact match only, no restore-keys: a partial hit would leave a stale
+          # binary in place. Keyed on the sources cmake actually compiles plus
+          # the versions of the system libraries they link against, so a libvips
+          # or liblqr bump on the runner still forces a rebuild.
+          key: natives-${{ matrix.platform.key }}-${{ steps.nativedeps.outputs.versions }}-${{ hashFiles('natives/**', 'CMakeLists.txt', 'package.json') }}
+
+      - name: Install packages
+        run: pnpm install --frozen-lockfile
+      - name: Build natives
+        if: steps.natives.outputs.cache-hit != 'true'
+        run: pnpm run build:natives
+      # Always run: this is the only workflow that type-checks the TypeScript.
+      - name: Build TypeScript
+        run: pnpm run build:ts
       - name: Upload natives
         uses: actions/upload-artifact@v7
         with:
